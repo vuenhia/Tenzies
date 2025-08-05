@@ -1,7 +1,12 @@
 export default function Die(props) {
 	return (
 		<div className="grid-container">
-			<button>{props.value}</button>
+			<button
+				style={{ backgroundColor: props.isHeld ? "#59E391" : "white" }}
+				onClick={props.hold}
+			>
+				{props.value}
+			</button>
 		</div>
 	);
 }
