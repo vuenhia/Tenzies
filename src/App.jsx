@@ -1,9 +1,10 @@
 import Die from "./assets/Components/Die.jsx";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
 export default function App() {
-	const [dice, setDice] = useState(generateAllNewDice());
+	const [dice, setDice] = useState(() => generateAllNewDice());
+	const buttonRef = useRef(null);
 
 	const gameWon =
 		dice.every((die) => die.isHeld) &&
@@ -17,17 +18,28 @@ export default function App() {
 		);
 	};
 	const rollDice = () => {
-		setDice((prevDice) =>
-			prevDice.map((dice) =>
-				dice.isHeld
-					? dice
-					: { ...dice, value: Math.floor(Math.random() * 6) + 1 }
-			)
-		);
+		if (!gameWon) {
+			setDice((prevDice) =>
+				prevDice.map((dice) =>
+					dice.isHeld
+						? dice
+						: { ...dice, value: Math.floor(Math.random() * 6) + 1 }
+				)
+			);
+		} else {
+			setDice(generateAllNewDice());
+		}
 	};
+
+	useEffect(() => {
+		if (gameWon && buttonRef.current) {
+			buttonRef.current.focus();
+		}
+	}, [gameWon]);
 	function generateAllNewDice() {
 		return new Array(10).fill(0).map(() => ({
 			value: Math.floor(Math.random() * 6) + 1,
+
 			isHeld: false,
 			id: nanoid(),
 		}));
@@ -44,6 +56,11 @@ export default function App() {
 	return (
 		<main>
 			{gameWon && <Confetti />}
+			<div aria-live="polite" className="sr-only">
+				{gameWon && (
+					<p>Congratulations! You won! Press "New Game" to start again.</p>
+				)}
+			</div>
 			<h1 className="title">Tenzies</h1>
 			<p className="instructions">
 				Roll until all dice are the same. Click each die to freeze it at its
